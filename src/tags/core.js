@@ -23,10 +23,11 @@ export const nullObj = {
     ctx.wrapScalars ? new Scalar(null) : null,
   default: true,
   tag: 'tag:yaml.org,2002:null',
+  sourceStr: null,
   test: /^(?:~|[Nn]ull|NULL)?$/,
   resolve: () => null,
   options: nullOptions,
-  stringify: () => nullOptions.nullStr
+  stringify: ({ sourceStr }) => sourceStr ?? nullOptions.nullStr
 }
 
 export const boolObj = {
