@@ -75,6 +75,15 @@ describe('tags', () => {
   })
 })
 
+describe('custom string on node', () => {
+  test('null String', () => {
+    YAML.scalarOptions.null.nullStr = 'None'
+    expect(YAML.parse('a: None')).toEqual({a: null})
+    expect(YAML.parse('a: strNone')).toEqual({a: 'strNone'})
+    expect(YAML.parse('a: NoneStr')).toEqual({a: 'NoneStr'})
+  })
+})
+
 describe('number types', () => {
   describe('asBigInt: false', () => {
     test('Version 1.1', () => {
