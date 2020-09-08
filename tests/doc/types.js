@@ -29,7 +29,7 @@ describe('json schema', () => {
 "option": TruE`
 
     const doc = YAML.parseDocument(src, { schema: 'json' })
-    expect(doc.toJSON()).toMatchObject({
+    expect(doc.toJS()).toMatchObject({
       canonical: true,
       answer: false,
       logical: null,
@@ -48,7 +48,7 @@ describe('json schema', () => {
 "not a number": .NaN`
 
     const doc = YAML.parseDocument(src, { schema: 'json' })
-    expect(doc.toJSON()).toMatchObject({
+    expect(doc.toJS()).toMatchObject({
       canonical: 685230.15,
       fixed: 685230.15,
       'negative infinity': null,
@@ -70,7 +70,7 @@ describe('json schema', () => {
 "hexadecimal": 0x0A74AE`
 
     const doc = YAML.parseDocument(src, { schema: 'json' })
-    expect(doc.toJSON()).toMatchObject({
+    expect(doc.toJS()).toMatchObject({
       canonical: 685230,
       decimal: -685230,
       octal: null,
@@ -92,7 +92,7 @@ describe('json schema', () => {
 ~: 'null key'`
 
     const doc = YAML.parseDocument(src, { schema: 'json' })
-    expect(doc.toJSON()).toMatchObject({
+    expect(doc.toJS()).toMatchObject({
       empty: null,
       canonical: null,
       english: null,
@@ -117,7 +117,7 @@ logical: True
 option: TruE\n`
 
     const doc = YAML.parseDocument(src)
-    expect(doc.toJSON()).toMatchObject({
+    expect(doc.toJS()).toMatchObject({
       canonical: true,
       answer: false,
       logical: true,
@@ -136,7 +136,7 @@ negative infinity: -.inf
 not a number: .NaN`
 
     const doc = YAML.parseDocument(src)
-    expect(doc.toJSON()).toMatchObject({
+    expect(doc.toJS()).toMatchObject({
       canonical: 685230.15,
       fixed: 685230.15,
       'negative infinity': Number.NEGATIVE_INFINITY,
@@ -155,7 +155,7 @@ octal: 0o2472256
 hexadecimal: 0x0A74AE`
 
     const doc = YAML.parseDocument(src)
-    expect(doc.toJSON()).toMatchObject({
+    expect(doc.toJS()).toMatchObject({
       canonical: 685230,
       decimal: 685230,
       octal: 685230,
@@ -174,7 +174,7 @@ english: null
 ~: null key`
 
     const doc = YAML.parseDocument(src)
-    expect(doc.toJSON()).toMatchObject({
+    expect(doc.toJS()).toMatchObject({
       empty: null,
       canonical: null,
       english: null,
@@ -193,14 +193,14 @@ one: 1
 2: two
 { 3: 4 }: many\n`
       const doc = YAML.parseDocument(src)
-      expect(doc.toJSON()).toMatchObject({
+      expect(doc.toJS()).toMatchObject({
         one: 1,
         '2': 'two',
         '{ 3: 4 }': 'many'
       })
       expect(doc.errors).toHaveLength(0)
       doc.contents.items[2].key = { 3: 4 }
-      expect(doc.toJSON()).toMatchObject({
+      expect(doc.toJS()).toMatchObject({
         one: 1,
         '2': 'two',
         '{"3":4}': 'many'
@@ -213,7 +213,7 @@ one: 1
 2: two
 { 3: 4 }: many\n`
       const doc = YAML.parseDocument(src, { mapAsMap: true })
-      expect(doc.toJSON()).toMatchObject(
+      expect(doc.toJS()).toMatchObject(
         new Map([
           ['one', 1],
           [2, 'two'],
@@ -222,7 +222,7 @@ one: 1
       )
       expect(doc.errors).toHaveLength(0)
       doc.contents.items[2].key = { 3: 4 }
-      expect(doc.toJSON()).toMatchObject(
+      expect(doc.toJS()).toMatchObject(
         new Map([
           ['one', 1],
           [2, 'two'],
@@ -286,7 +286,7 @@ logical: True
 option: on`
 
     const doc = YAML.parseDocument(src, { version: '1.1' })
-    expect(doc.toJSON()).toMatchObject({
+    expect(doc.toJS()).toMatchObject({
       canonical: true,
       answer: false,
       logical: true,
@@ -309,7 +309,7 @@ negative infinity: -.inf
 not a number: .NaN`
 
     const doc = YAML.parseDocument(src)
-    expect(doc.toJSON()).toMatchObject({
+    expect(doc.toJS()).toMatchObject({
       canonical: 685230.15,
       exponential: 685230.15,
       fixed: 685230.15,
@@ -338,7 +338,7 @@ binary: 0b1010_0111_0100_1010_1110
 sexagesimal: 190:20:30`
 
     const doc = YAML.parseDocument(src)
-    expect(doc.toJSON()).toMatchObject({
+    expect(doc.toJS()).toMatchObject({
       canonical: 685230,
       decimal: 685230,
       octal: 685230,
@@ -365,7 +365,7 @@ english: null
 ~: null key`
 
     const doc = YAML.parseDocument(src)
-    expect(doc.toJSON()).toMatchObject({
+    expect(doc.toJS()).toMatchObject({
       empty: null,
       canonical: null,
       english: null,
@@ -389,7 +389,7 @@ space separated:  2001-12-14 21:59:43.10 -5
 no time zone (Z): 2001-12-15 2:59:43.10
 date (00:00:00Z): 2002-12-14`
 
-      const doc = YAML.parseDocument(src, { keepBlobsInJSON: false })
+      const doc = YAML.parseDocument(src)
       doc.contents.items.forEach(item => {
         expect(item.value.value).toBeInstanceOf(Date)
       })
@@ -431,8 +431,8 @@ date (00:00:00Z): 2002-12-14\n`)
           { key: { value: 'b' }, value: { value: 2 } },
           { key: { value: 'a' }, value: { value: 3 } }
         ])
-        expect(doc.toJSON()).toBeInstanceOf(Array)
-        expect(doc.toJSON()).toMatchObject([{ a: 1 }, { b: 2 }, { a: 3 }])
+        expect(doc.toJS()).toBeInstanceOf(Array)
+        expect(doc.toJS()).toMatchObject([{ a: 1 }, { b: 2 }, { a: 3 }])
         expect(String(doc)).toBe(src)
       })
 
@@ -459,8 +459,8 @@ date (00:00:00Z): 2002-12-14\n`)
       test(name, () => {
         const doc = YAML.parseDocument(src, { version: '1.1' })
         expect(doc.contents).toBeInstanceOf(YAMLOMap)
-        expect(doc.toJSON()).toBeInstanceOf(Map)
-        expect(doc.toJSON()).toMatchObject(
+        expect(doc.toJS()).toBeInstanceOf(Map)
+        expect(doc.toJS()).toMatchObject(
           new Map([
             ['a', 1],
             ['b', 2],
@@ -516,8 +516,8 @@ date (00:00:00Z): 2002-12-14\n`)
       test(name, () => {
         const doc = YAML.parseDocument(src, { version: '1.1' })
         expect(doc.contents).toBeInstanceOf(YAMLSet)
-        expect(doc.toJSON()).toBeInstanceOf(Set)
-        expect(doc.toJSON()).toMatchObject(new Set(['a', 'b', 'c']))
+        expect(doc.toJS()).toBeInstanceOf(Set)
+        expect(doc.toJS()).toMatchObject(new Set(['a', 'b', 'c']))
         expect(String(doc)).toBe(src)
       })
 
@@ -626,7 +626,7 @@ perl: !perl/Text::Tabs {}`
 
     const doc = YAML.parseDocument(src)
     expect(doc.version).toBe('1.0')
-    expect(doc.toJSON()).toMatchObject({
+    expect(doc.toJS()).toMatchObject({
       number: 123,
       string: '123',
       pool: { number: 8 },
@@ -657,7 +657,7 @@ invoice: !domain.tld,2002/^invoice
 
     const doc = YAML.parseDocument(src)
     expect(doc.version).toBe('1.0')
-    expect(doc.toJSON()).toMatchObject({
+    expect(doc.toJS()).toMatchObject({
       invoice: { customers: [{ family: 'Dumars', given: 'Chris' }] }
     })
     expect(String(doc)).toBe(`%YAML:1.0

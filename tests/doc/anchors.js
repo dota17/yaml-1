@@ -33,7 +33,7 @@ test('circular reference', () => {
   const { items } = doc.contents
   expect(items).toHaveLength(2)
   expect(items[1].source).toBe(doc.contents)
-  const res = doc.toJSON()
+  const res = doc.toJS()
   expect(res[1]).toBe(res)
   expect(String(doc)).toBe(src)
 })
@@ -66,7 +66,7 @@ describe('create', () => {
     const doc = YAML.parseDocument('[{ a: A }, { b: B }]')
     const alias = doc.anchors.createAlias(doc.contents.items[0], 'AA')
     doc.contents.items.push(alias)
-    expect(doc.toJSON()).toMatchObject([{ a: 'A' }, { b: 'B' }, { a: 'A' }])
+    expect(doc.toJS()).toMatchObject([{ a: 'A' }, { b: 'B' }, { a: 'A' }])
     expect(String(doc)).toMatch('[ &AA { a: A }, { b: B }, *AA ]\n')
   })
 
@@ -79,6 +79,28 @@ describe('create', () => {
     expect(() => {
       alias.tag = 'tag:yaml.org,2002:alias'
     }).toThrow('Alias nodes cannot have tags')
+  })
+})
+
+describe('__proto__ as anchor name', () => {
+  test('parse', () => {
+    const src = `- &__proto__ 1\n- *__proto__\n`
+    const doc = YAML.parseDocument(src)
+    expect(doc.errors).toHaveLength(0)
+    const { items } = doc.contents
+    expect(items).toMatchObject([{ value: 1 }, { source: { value: 1 } }])
+    expect(items[1].source).toBe(items[0])
+    expect(String(doc)).toBe(src)
+  })
+
+  test('create/stringify', () => {
+    const doc = YAML.parseDocument('[{ a: A }, { b: B }]')
+    const alias = doc.anchors.createAlias(doc.contents.items[0], '__proto__')
+    doc.contents.items.push(alias)
+    expect(doc.toJSON()).toMatchObject([{ a: 'A' }, { b: 'B' }, { a: 'A' }])
+    expect(String(doc)).toMatch(
+      '[ &__proto__ { a: A }, { b: B }, *__proto__ ]\n'
+    )
   })
 })
 
@@ -151,7 +173,7 @@ describe('merge <<', () => {
       const [a, b] = doc.contents.items
       const merge = doc.anchors.createMergePair(a)
       b.items.push(merge)
-      expect(doc.toJSON()).toMatchObject([{ a: 'A' }, { a: 'A', b: 'B' }])
+      expect(doc.toJS()).toMatchObject([{ a: 'A' }, { a: 'A', b: 'B' }])
       expect(String(doc)).toBe('[ &a1 { a: A }, { b: B, <<: *a1 } ]\n')
     })
 
@@ -161,7 +183,7 @@ describe('merge <<', () => {
       const alias = doc.anchors.createAlias(a, 'AA')
       const merge = doc.anchors.createMergePair(alias)
       b.items.push(merge)
-      expect(doc.toJSON()).toMatchObject([{ a: 'A' }, { a: 'A', b: 'B' }])
+      expect(doc.toJS()).toMatchObject([{ a: 'A' }, { a: 'A', b: 'B' }])
       expect(String(doc)).toBe('[ &AA { a: A }, { b: B, <<: *AA } ]\n')
     })
 
@@ -203,10 +225,7 @@ y:
   <<: [ *a, *b ]`
 
     const expObj = {
-      x: [
-        { k0: 'v1', k1: 'v1' },
-        { k1: 'v2', k2: 'v2' }
-      ],
+      x: [{ k0: 'v1', k1: 'v1' }, { k1: 'v2', k2: 'v2' }],
       y: { k0: 'v0', k1: 'v1', k2: 'v2' }
     }
 
@@ -214,24 +233,11 @@ y:
       [
         'x',
         [
-          new Map([
-            ['k0', 'v1'],
-            ['k1', 'v1']
-          ]),
-          new Map([
-            ['k1', 'v2'],
-            ['k2', 'v2']
-          ])
+          new Map([['k0', 'v1'], ['k1', 'v1']]),
+          new Map([['k1', 'v2'], ['k2', 'v2']])
         ]
       ],
-      [
-        'y',
-        new Map([
-          ['k0', 'v0'],
-          ['k1', 'v1'],
-          ['k2', 'v2']
-        ])
-      ]
+      ['y', new Map([['k0', 'v0'], ['k1', 'v1'], ['k2', 'v2']])]
     ])
 
     test('multiple merge keys, masAsMap: false', () => {
@@ -280,7 +286,7 @@ y:
       const doc = YAML.parseDocument(src, { merge: true })
       expect(doc.errors).toHaveLength(0)
       expect(doc.warnings).toHaveLength(0)
-      expect(() => doc.toJSON()).toThrow('Maximum call stack size exceeded')
+      expect(() => doc.toJS()).toThrow('Maximum call stack size exceeded')
       expect(String(doc)).toBe(src)
     })
   })

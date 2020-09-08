@@ -5,14 +5,14 @@ import { Collection } from './Collection.js'
 import { Node } from './Node.js'
 import { Scalar } from './Scalar.js'
 import { YAMLSeq } from './YAMLSeq.js'
-import { toJSON } from './toJSON.js'
+import { toJS } from './toJS.js'
 
 const stringifyKey = (key, jsKey, ctx) => {
   if (jsKey === null) return ''
   if (typeof jsKey !== 'object') return String(jsKey)
   if (key instanceof Node && ctx && ctx.doc)
     return key.toString({
-      anchors: {},
+      anchors: Object.create(null),
       doc: ctx.doc,
       indent: '',
       indentStep: ctx.indentStep,
@@ -57,15 +57,23 @@ export class Pair extends Node {
   }
 
   addToJSMap(ctx, map) {
-    const key = toJSON(this.key, '', ctx)
+    const key = toJS(this.key, '', ctx)
     if (map instanceof Map) {
-      const value = toJSON(this.value, key, ctx)
+      const value = toJS(this.value, key, ctx)
       map.set(key, value)
     } else if (map instanceof Set) {
       map.add(key)
     } else {
       const stringKey = stringifyKey(this.key, key, ctx)
-      map[stringKey] = toJSON(this.value, stringKey, ctx)
+      const value = toJS(this.value, stringKey, ctx)
+      if (stringKey in map)
+        Object.defineProperty(map, stringKey, {
+          value,
+          writable: true,
+          enumerable: true,
+          configurable: true
+        })
+      else map[stringKey] = value
     }
     return map
   }
