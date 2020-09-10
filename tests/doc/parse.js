@@ -91,6 +91,24 @@ describe('custom string on node', () => {
     expect(str).toBe('a: \n')
     expect(YAML.parse(str)).toEqual({a: null})
   })
+
+  test('empty string camelBool', () => {
+    YAML.scalarOptions.bool.trueStr = 'True'
+    YAML.scalarOptions.bool.falseStr = 'False'
+    const doc = YAML.parse('[true, false]')
+    const str = YAML.stringify(doc)
+    expect(str).toBe('- True\n- False\n')
+    expect(YAML.parse(str)).toEqual([true, false])
+  })
+
+  test('empty string upperBool', () => {
+    YAML.scalarOptions.bool.trueStr = 'TRUE'
+    YAML.scalarOptions.bool.falseStr = 'FALSE'
+    const doc = YAML.parse('[true, false]')
+    const str = YAML.stringify(doc)
+    expect(str).toBe('- TRUE\n- FALSE\n')
+    expect(YAML.parse(str)).toEqual([true, false])
+  })
 })
 
 describe('number types', () => {

@@ -38,9 +38,16 @@ export const boolObj = {
   default: true,
   tag: 'tag:yaml.org,2002:bool',
   test: /^(?:[Tt]rue|TRUE|[Ff]alse|FALSE)$/,
-  resolve: str => str[0] === 't' || str[0] === 'T',
+  resolve: str => {
+    const node = new Scalar(str[0] === 't' || str[0] === 'T')
+    node.sourceStr = str
+    return node
+  },
   options: boolOptions,
-  stringify: ({ value }) => (value ? boolOptions.trueStr : boolOptions.falseStr)
+  stringify: ({
+    value,
+    sourceStr
+  }) => (value ? sourceStr ?? boolOptions.trueStr : sourceStr ?? boolOptions.falseStr)
 }
 
 export const octObj = {

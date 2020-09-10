@@ -124,8 +124,8 @@ option: TruE\n`
       option: 'TruE'
     })
     expect(String(doc)).toBe(`canonical: true
-answer: false
-logical: true
+answer: FALSE
+logical: True
 option: TruE\n`)
   })
 
@@ -292,10 +292,10 @@ option: on`
       logical: true,
       option: true
     })
-    expect(String(doc)).toBe(`canonical: true
-answer: false
-logical: true
-option: true\n`)
+    expect(String(doc)).toBe(`canonical: y
+answer: NO
+logical: True
+option: on\n`)
   })
 
   test('!!float', () => {

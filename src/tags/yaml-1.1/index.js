@@ -10,8 +10,14 @@ import { pairs } from './pairs.js'
 import { set } from './set.js'
 import { intTime, floatTime, timestamp } from './timestamp.js'
 
-const boolStringify = ({ value }) =>
-  value ? boolOptions.trueStr : boolOptions.falseStr
+const boolStringify = ({ value, sourceStr }) =>
+  value ? sourceStr ?? boolOptions.trueStr : sourceStr ?? boolOptions.falseStr
+
+const boolResolve = (value, str) => {
+  const node = new Scalar(value)
+  node.sourceStr = str
+  return node
+}
 
 const intIdentify = value =>
   typeof value === 'bigint' || Number.isInteger(value)
@@ -68,7 +74,7 @@ export const yaml11 = failsafe.concat(
       default: true,
       tag: 'tag:yaml.org,2002:bool',
       test: /^(?:Y|y|[Yy]es|YES|[Tt]rue|TRUE|[Oo]n|ON)$/,
-      resolve: () => true,
+      resolve: str => { return boolResolve(true, str)},
       options: boolOptions,
       stringify: boolStringify
     },
@@ -77,7 +83,7 @@ export const yaml11 = failsafe.concat(
       default: true,
       tag: 'tag:yaml.org,2002:bool',
       test: /^(?:N|n|[Nn]o|NO|[Ff]alse|FALSE|[Oo]ff|OFF)$/i,
-      resolve: () => false,
+      resolve: str => { return boolResolve(false, str)},
       options: boolOptions,
       stringify: boolStringify
     },
