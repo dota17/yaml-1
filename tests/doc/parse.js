@@ -76,11 +76,20 @@ describe('tags', () => {
 })
 
 describe('custom string on node', () => {
-  test('null String', () => {
-    YAML.scalarOptions.null.nullStr = 'None'
-    expect(YAML.parse('a: None')).toEqual({a: null})
-    expect(YAML.parse('a: strNone')).toEqual({a: 'strNone'})
-    expect(YAML.parse('a: NoneStr')).toEqual({a: 'NoneStr'})
+  test('tiled null', () => {
+    YAML.scalarOptions.null.nullStr = '~'
+    const doc = YAML.parse('a: null')
+    const str = YAML.stringify(doc, {simpleKeys: true})
+    expect(str).toBe('a: ~\n')
+    expect(YAML.parse(str)).toEqual({a: null})
+  })
+  
+  test('empty string null', () => {
+    YAML.scalarOptions.null.nullStr = ''
+    const doc = YAML.parse('a: null')
+    const str = YAML.stringify(doc, {simpleKeys: true})
+    expect(str).toBe('a: \n')
+    expect(YAML.parse(str)).toEqual({a: null})
   })
 })
 
